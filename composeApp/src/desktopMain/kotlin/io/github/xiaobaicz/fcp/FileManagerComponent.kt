@@ -56,10 +56,10 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
 
     init {
         openHome()
-        reset(list)
+        refresh()
     }
 
-    private fun reset(list: List<File>) {
+    fun refresh() {
         select = null
         currentDir = dir
         items.clear()
@@ -71,21 +71,21 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
         Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
             Tool(vectorResource(Res.drawable.upper), "上一级") {
                 back()
-                reset(list)
+                refresh()
             }
             Tool(vectorResource(Res.drawable.drive), "硬盘") {
                 openDrive()
-                reset(list)
+                refresh()
             }
             Tool(vectorResource(Res.drawable.home), "主页") {
                 openHome()
-                reset(list)
+                refresh()
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(isShowHiddenState, {
                     isShowHiddenState = it
                     isShowHidden = it
-                    reset(list)
+                    refresh()
                 }, modifier = Modifier.size(40.dp).padding(8.dp))
                 Text(
                     text = "隐藏文件",
@@ -97,7 +97,7 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
                 Checkbox(isOnlyDirState, {
                     isOnlyDirState = it
                     isOnlyDir = it
-                    reset(list)
+                    refresh()
                 }, modifier = Modifier.size(40.dp).padding(8.dp))
                 Text(
                     text = "仅文件夹",
@@ -140,7 +140,7 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
         val mod = Modifier.fillMaxWidth()
             .height(54.dp)
             .combinedClickable(onDoubleClick = {
-                if (open(file)) reset(list)
+                if (open(file)) refresh()
             }) {
                 select = file
             }

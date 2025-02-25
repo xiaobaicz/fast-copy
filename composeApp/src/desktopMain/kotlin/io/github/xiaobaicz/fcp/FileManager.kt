@@ -47,7 +47,7 @@ interface FileManager {
             }
             if (!dir.isDirectory) return false
             this.dir = dir
-            this.list = dir.listFiles()
+            this.list = (dir.listFiles() ?: arrayOf())
                 .filter { file -> isShowHidden || !file.isHidden }
                 .filter { file -> !isOnlyDir || file.isDirectory  }
                 .sorted()

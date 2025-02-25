@@ -13,7 +13,7 @@ fun main() = application {
     )
     Window(
         onCloseRequest = ::exitApplication,
-        title = "快速复制",
+        title = "选择复制目标",
         state = windowState,
     ) {
         App()

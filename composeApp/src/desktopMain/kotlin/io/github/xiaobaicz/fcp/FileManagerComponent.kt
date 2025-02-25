@@ -42,7 +42,8 @@ import io.github.xiaobaicz.fcp.widgets.Component
 import org.jetbrains.compose.resources.vectorResource
 import java.io.File
 
-class FileManagerComponent : Component, FileManager by FileManager.create() {
+class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
+    FileManager by FileManager.create() {
     private val items = mutableStateListOf<File>()
 
     private var currentDir by mutableStateOf<File?>(null)
@@ -89,7 +90,7 @@ class FileManagerComponent : Component, FileManager by FileManager.create() {
                 Text(
                     text = "隐藏文件",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -101,14 +102,32 @@ class FileManagerComponent : Component, FileManager by FileManager.create() {
                 Text(
                     text = "仅文件夹",
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                Text(
+                    text = "选择",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.shadow(8.dp, shape = RoundedCornerShape(4.dp))
+                        .background(Color.White)
+                        .clickable {
+                            onSelect(select ?: return@clickable)
+                        }
+                        .padding(horizontal = 16.dp)
                 )
             }
         }
     }
 
     @Composable
-    private fun Tool(image: ImageVector, text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    private fun Tool(
+        image: ImageVector,
+        text: String,
+        modifier: Modifier = Modifier,
+        onClick: () -> Unit
+    ) {
         Box(modifier = modifier.clickable(onClick = onClick)) {
             Icon(image, text, modifier = Modifier.size(40.dp).padding(8.dp))
         }
@@ -137,17 +156,20 @@ class FileManagerComponent : Component, FileManager by FileManager.create() {
 
     @Composable
     override fun Content(modifier: Modifier) {
-        Column(modifier = modifier.shadow(8.dp, shape = RoundedCornerShape(8.dp)).background(Color.White)) {
-            Toolbar(modifier = Modifier.padding(horizontal = 8.dp).padding(top = 8.dp))
+        Column(
+            modifier = modifier.shadow(8.dp, shape = RoundedCornerShape(8.dp))
+                .background(Color.White)
+        ) {
+            Toolbar(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
             currentDir?.apply {
                 Text(
                     absolutePath,
-                    modifier = Modifier.padding(horizontal = 8.dp).padding(top = 8.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 8.dp)) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items, key = { it.absolutePath }, contentType = { it.isDirectory }) {
                     FileItem(it)
                 }

@@ -60,6 +60,8 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
     }
 
     fun refresh() {
+        isShowHiddenState = isShowHidden
+        isOnlyDirState = isOnlyDir
         select = null
         currentDir = dir
         items.clear()
@@ -83,7 +85,6 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(isShowHiddenState, {
-                    isShowHiddenState = it
                     isShowHidden = it
                     refresh()
                 }, modifier = Modifier.size(40.dp).padding(8.dp))
@@ -95,7 +96,6 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(isOnlyDirState, {
-                    isOnlyDirState = it
                     isOnlyDir = it
                     refresh()
                 }, modifier = Modifier.size(40.dp).padding(8.dp))

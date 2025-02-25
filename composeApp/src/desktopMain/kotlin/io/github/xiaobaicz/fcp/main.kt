@@ -14,7 +14,6 @@ fun main() = application {
     val context = rememberSaveable { WindowContext("选择复制目标") }
     WindowContextProvider(context) {
         val state = rememberWindowState(
-            placement = WindowPlacement.Floating,
             position = WindowPosition.Aligned(Alignment.Center),
             size = DpSize(480.dp, 720.dp)
         )

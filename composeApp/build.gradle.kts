@@ -35,9 +35,15 @@ compose.desktop {
         mainClass = "io.github.xiaobaicz.fcp.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "FastCopy"
-            packageVersion = "1.0.0"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
+            packageName = "快速复制"
+            packageVersion = "2.0.0"
+            macOS {
+                iconFile.set(project.file("icons/app.icns"))
+            }
+            windows {
+                iconFile.set(project.file("icons/app.ico"))
+            }
         }
     }
 }

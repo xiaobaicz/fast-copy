@@ -170,7 +170,7 @@ class FileManagerComponent(private val onSelect: (File) -> Unit) : Component,
                 )
             }
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(items, key = { it.absolutePath }, contentType = { it.isDirectory }) {
+                items(items, key = { it.absolutePath }) {
                     FileItem(it)
                 }
             }

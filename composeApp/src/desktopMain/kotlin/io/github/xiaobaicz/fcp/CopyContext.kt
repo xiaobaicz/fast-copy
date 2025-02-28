@@ -12,7 +12,7 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.StandardOpenOption
-import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
@@ -28,11 +28,25 @@ class CopyContext(
             Runtime.getRuntime().availableProcessors(),
             1,
             TimeUnit.MINUTES,
-            SynchronousQueue(),
+            LinkedBlockingQueue(),
+        ).asCoroutineDispatcher()
+
+        private val info = ThreadPoolExecutor(
+            0,
+            1,
+            1,
+            TimeUnit.MINUTES,
+            LinkedBlockingQueue(),
         ).asCoroutineDispatcher()
     }
 
+    private val baseSrcPath = src.parentFile.absolutePath
+
+    private val baseDestPath = dest.absolutePath
+
     private var isClose = false
+
+    private var isEnd = false
 
     var totalCount by mutableStateOf(0)
         private set
@@ -80,19 +94,28 @@ class CopyContext(
 
     suspend fun run() {
         withContext(task) {
-            init()
-            launch {
-                statistics()
+            statistics()
+            launch(info) {
+                monitor()
             }
             start()
         }
     }
 
-    private suspend fun statistics() {
+    private fun statistics() {
+        forEach(true) {
+            totalCount++
+            totalSize += it.length()
+        }
+        remCount = totalCount
+        remSize = totalSize
+    }
+
+    private suspend fun monitor() {
         val start = System.currentTimeMillis()
         var lastSize = remSize
         var speedTime = 0L
-        while (!isClose && remCount > 0) {
+        while (!isClose && !isEnd) {
             delay(250L)
             time = System.currentTimeMillis() - start
             if (time - speedTime >= 1000L) {
@@ -103,36 +126,11 @@ class CopyContext(
         }
     }
 
-    private inline fun forEach(file: (File) -> Unit) {
-        val stack = arrayListOf(src)
-        while (!isClose) {
-            if (stack.isEmpty()) break
-            val last = stack.removeLast()
-            if (last.isDirectory) {
-                stack.addAll(last.listFiles()?.toList() ?: listOf())
-                continue
-            }
-            file(last)
-        }
-    }
-
-    private fun init() {
-        forEach {
-            totalCount++
-            totalSize += it.length()
-        }
-        remCount = totalCount
-        remSize = totalSize
-    }
-
     private fun start() {
-        val baseSrcPath = src.parentFile.absolutePath
-        val baseDestPath = dest.absolutePath
         val buf = ByteBuffer.allocate(bufSize)
         forEach {
             val srcPath = it.absolutePath
             val destPath = srcPath.replace(baseSrcPath, baseDestPath)
-            File(destPath).parentFile?.apply { if (!exists()) mkdirs() }
             val srcChannel = FileChannel.open(Path(srcPath), StandardOpenOption.CREATE, StandardOpenOption.READ)
             val destChannel = FileChannel.open(Path(destPath), StandardOpenOption.CREATE, StandardOpenOption.WRITE)
             while (true) {
@@ -146,6 +144,27 @@ class CopyContext(
             destChannel.close()
             srcChannel.close()
             remCount--
+        }
+        isEnd = true
+    }
+
+    private inline fun forEach(mkdir: Boolean = false, file: (File) -> Unit) {
+        val stack = arrayStack(src)
+        while (!isClose) {
+            if (stack.isEmpty) break
+            val last = stack.pop()
+            if (last.isDirectory) {
+                if (mkdir) {
+                    val destPath = last.absolutePath.replace(baseSrcPath, baseDestPath)
+                    val destDir = File(destPath)
+                    if (!destDir.exists()) {
+                        destDir.mkdirs()
+                    }
+                }
+                stack.push(last.listFiles() ?: arrayOf())
+                continue
+            }
+            file(last)
         }
     }
 

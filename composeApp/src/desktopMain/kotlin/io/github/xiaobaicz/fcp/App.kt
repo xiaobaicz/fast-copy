@@ -47,7 +47,7 @@ fun App() {
                     target = it
                 }
             }
-            fmc.Content(modifier = Modifier)
+            fmc.Content()
         }
         localWindowContext.enabled = target == null
         CopyTo()
@@ -84,7 +84,7 @@ fun CopyTo() {
                         refresh()
                     }
                 }
-                fmc.Content(modifier = Modifier)
+                fmc.Content()
             }
         }
     }

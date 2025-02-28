@@ -37,7 +37,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageName = "快速复制"
-            packageVersion = "2.0.0"
+            packageVersion = "2.0.1"
             macOS {
                 iconFile.set(project.file("icons/app.icns"))
             }

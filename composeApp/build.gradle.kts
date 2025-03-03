@@ -37,12 +37,14 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             packageName = "快速复制"
-            packageVersion = "2.0.1"
+            packageVersion = "2.0.2"
             macOS {
                 iconFile.set(project.file("icons/app.icns"))
             }
             windows {
                 iconFile.set(project.file("icons/app.ico"))
+                shortcut = true
+                dirChooser = true
             }
         }
     }
